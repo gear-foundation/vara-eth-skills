@@ -11,6 +11,7 @@ Use this checklist before treating a deploy, interaction, or integration example
 - Private keys are never hard-coded in reusable docs or examples.
 - TypeScript examples that parse IDL v2 use `SailsIdlParser` from `sails-js/parser`.
 - IDL v2 examples do not use the old standalone `sails-js-parser` package.
+- TypeScript examples are run from the package directory where the verified `sails-js` dependency is installed.
 
 ## Deploy
 

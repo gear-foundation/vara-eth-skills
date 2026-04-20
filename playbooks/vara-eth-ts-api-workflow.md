@@ -42,6 +42,8 @@ Use the Sails JS release tarball when the script needs IDL v2 support:
 
 Do not add a separate `sails-js-parser` dependency for IDL v2. Import the parser from `sails-js/parser`.
 
+Run TypeScript snippets from the package directory where these dependencies are installed. This matters for `sails-js/parser`: if the command is launched from a parent directory with another `node_modules`, Node can resolve the wrong `sails-js` package.
+
 ## 1. Initialize Clients
 
 Use `createVaraEthApi(...)` as the primary constructor. It initializes the Ethereum client internally; access it through `api.eth` when needed.
