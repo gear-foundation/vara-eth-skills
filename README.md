@@ -1,6 +1,6 @@
 # Vara.eth Skills
 
-Shared AI playbooks and agent skills for Vara.eth contract authoring, deployment, interaction, and integration.
+Tool-agnostic playbooks and agent skills for Vara.eth contract authoring, deployment, interaction, and integration.
 
 The canonical guidance lives in:
 
@@ -45,11 +45,18 @@ Start with the skill that matches the task:
 
 Use `playbooks/` for detailed CLI, TypeScript, and ABI workflows once the app-builder skill selects the path.
 
-For the current phase, start with `vara-eth-contract-writer`. Use `vara-eth-app-builder` only after contract authoring is already done.
+Use `examples/` as runnable references, not as mandatory templates. The `vault` example verifies contract, CLI, TypeScript, and ABI workflows. The `escrow` example verifies the general Solidity callback pattern where Solidity holds funds and Vara.eth confirms asynchronous state transitions.
 
 ## Validation
 
 This repository is intentionally tool-agnostic. Validate changes by checking the Markdown, running the runnable examples where relevant, and keeping `SKILL.md` frontmatter simple enough for different agents to consume.
+
+For contract examples:
+
+```bash
+cargo build --release
+cargo test --release
+```
 
 For the `vault` TypeScript example:
 
@@ -63,4 +70,5 @@ For the `escrow` contract example:
 ```bash
 cd examples/escrow
 cargo build --release
+cargo sails sol --idl-path target/wasm32-gear/release/order_escrow.idl
 ```
