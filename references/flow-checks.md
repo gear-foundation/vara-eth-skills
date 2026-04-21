@@ -34,6 +34,9 @@ Use this checklist before treating a deploy, interaction, or integration example
 - Reply listener examples call `setupReplyListener()` and then `await waitForReply()`.
 - Common reply codes are decoded: `0x00000000` for success auto reply and `0x00010000` for success manual reply.
 - ABI-facing examples do not assume an Ethereum receipt means Vara.eth read-only state is already visible; they poll or repeat state reads where needed.
+- Solidity adapter examples store `messageId -> operation context` before relying on callbacks.
+- Solidity callback handlers restrict `msg.sender` to the trusted generated ABI/Mirror contract.
+- Solidity examples state whether user funds stay in Solidity, are sent as Vara.eth native value, or are only used as wVARA executable balance.
 - Caller restrictions and failure cases are stated when relevant.
 - Event names and parameters are checked from contracts or ABI artifacts.
 - Ethereum address versus `ActorId` conversion is explicit when account ids are used in queries.

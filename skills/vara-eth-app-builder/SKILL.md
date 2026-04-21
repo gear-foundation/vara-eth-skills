@@ -14,6 +14,7 @@ Pick the narrowest workflow for the task:
 - Direct CLI lifecycle: read `../../playbooks/vara-eth-ethexe-cli-workflow.md`.
 - Scripted TypeScript lifecycle: read `../../playbooks/vara-eth-ts-api-workflow.md`.
 - Solidity ABI interface lifecycle: read `../../playbooks/vara-eth-abi-interface.md`.
+- Solidity contract adapter or callback handler: use `../vara-eth-solidity-integrator/SKILL.md`.
 
 Use `../../references/source-map.md` when a claim depends on implementation details. Use `../../references/flow-checks.md` as the final review checklist for deploy/interact examples.
 
@@ -93,6 +94,8 @@ An ABI-enabled workflow has these pieces:
 6. Poll or repeat read-only checks when verifying state.
 
 Ethereum transaction receipts can arrive before Vara.eth state is visible through read-only calls. Examples should make this explicit and verify state with polling or repeated reads where needed.
+
+For Solidity contracts that call an ABI-enabled Vara.eth program, treat the Ethereum call as asynchronous. Store the returned `messageId`, complete local Solidity state only from trusted callbacks, and keep ETH value, Vara.eth native value, and wVARA executable balance separate.
 
 ## Replies And State Reads
 

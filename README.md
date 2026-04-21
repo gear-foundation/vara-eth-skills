@@ -19,7 +19,9 @@ The canonical guidance lives in:
 - `references/flow-checks.md` - practical checks for deploy/interact examples
 - `skills/vara-eth-contract-writer` - self-contained skill for writing Rust Sails contracts for Vara.eth
 - `skills/vara-eth-app-builder` - self-contained skill for deploy and integration flows around an existing contract
+- `skills/vara-eth-solidity-integrator` - self-contained skill for Solidity contracts that call Vara.eth through generated ABI interfaces and async callbacks
 - `examples/vault` - runnable contract, CLI, TypeScript, and ABI workflow example
+- `examples/escrow` - simple Solidity escrow adapter backed by a Vara.eth async order engine
 
 ## Source Of Truth
 
@@ -39,6 +41,7 @@ Start with the skill that matches the task:
 
 - contract authoring: `skills/vara-eth-contract-writer/SKILL.md`
 - deploy, interaction, or integration around an existing contract: `skills/vara-eth-app-builder/SKILL.md`
+- Solidity contracts that integrate with Vara.eth ABI callbacks: `skills/vara-eth-solidity-integrator/SKILL.md`
 
 Use `playbooks/` for detailed CLI, TypeScript, and ABI workflows once the app-builder skill selects the path.
 
@@ -53,4 +56,11 @@ For the `vault` TypeScript example:
 ```bash
 cd examples/vault
 npm run check
+```
+
+For the `escrow` contract example:
+
+```bash
+cd examples/escrow
+cargo build --release
 ```
