@@ -1,27 +1,60 @@
-## The **vault** program
+# Vault Example
 
-[![Build Status](https://github.com/gear-tech/vault/workflows/CI/badge.svg)](https://github.com/gear-tech/vault/actions)
+This example is a small Vara.eth Sails contract plus runnable interaction flows.
 
-Program **vault** for [⚙️ Gear Protocol](https://github.com/gear-tech/gear) written in [⛵ Sails](https://github.com/gear-tech/sails) framework.
+It demonstrates:
 
-The program workspace includes the following packages:
-- `vault` is the package allowing to build WASM binary for the program and IDL file for it.
-  The package also includes integration tests for the program in the `tests` sub-folder
-- `vault-app` is the package containing business logic for the program represented by the `Vault` structure.
-- `vault-client` is the package containing the client for the program allowing to interact with it from another program, tests, or off-chain client.
+- a Rust/Sails contract built with the `ethexe` feature
+- multiple services sharing state (`vault` and `admin`)
+- payable deposit and value-returning withdraw
+- generated IDL and Solidity ABI interface usage
+- TypeScript interaction with `@vara-eth/api`, `viem`, and `sails-js/parser`
 
-### 🏗️ Building
+## Workspace
+
+- `vault` builds the WASM binary and IDL file.
+- `vault-app` contains the contract logic.
+- `vault-client` contains the generated Rust client used by tests.
+- `ts/` contains runnable TypeScript scripts.
+- `Vault.sol` is generated from the Sails IDL and kept as an ABI reference.
+
+## Build
 
 ```bash
 cargo build --release
 ```
 
-### ✅ Testing
+Expected artifacts:
+
+```text
+target/wasm32-gear/release/vault.opt.wasm
+target/wasm32-gear/release/vault.idl
+```
+
+## Test
 
 ```bash
 cargo test --release
 ```
 
-# License
+## TypeScript Checks
+
+```bash
+npm run check
+```
+
+The TypeScript scripts read configuration from environment variables. Start with `.env.example`, but do not commit real private keys.
+
+## ABI Interface
+
+Regenerate the Solidity ABI interface after IDL changes:
+
+```bash
+cargo sails sol --idl-path target/wasm32-gear/release/vault.idl
+```
+
+Generated `.sol` files include callback stubs with `TODO` comments. Application contracts should implement callbacks in their own adapter or caller contract.
+
+## License
 
 The source code is licensed under the [MIT license](LICENSE).

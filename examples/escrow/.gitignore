@@ -3,3 +3,11 @@
 .vscode
 .idea
 /target
+/cache
+/out
+/frontend/node_modules
+/frontend/dist
+/frontend/.env
+/frontend/*.tsbuildinfo
+/frontend/vite.config.d.ts
+/frontend/vite.config.js

@@ -45,10 +45,12 @@ Typical dependency block:
 
 ```toml
 [dependencies]
-sails-rs = { version = "0.10.1", features = ["ethexe"] }
+sails-rs = { version = "1.0.0-beta.2", features = ["ethexe"] }
 parity-scale-codec = { version = "3", default-features = false }
 scale-info = { version = "2", default-features = false }
 ```
+
+Keep the `sails-rs` version compatible with the installed `sails-cli` and generated project. The examples in this repository use `sails-rs = "1.0.0-beta.2"`.
 
 Use `parity-scale-codec` and `scale-info` when public custom types need encoding and type metadata.
 

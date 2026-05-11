@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.28;
 
-interface IVaultApp {
+interface IVault {
     event Deposited(uint8[32], uint128, uint128);
 
     event Withdrawn(uint8[32], uint128, uint128);
@@ -29,7 +29,7 @@ interface IVaultApp {
     function adminUnpause(bool _callReply) external returns (bytes32 messageId);
 }
 
-contract VaultAppAbi is IVaultApp {
+contract VaultAbi is IVault {
     function create(bool _callReply) external returns (bytes32 messageId) {}
 
     function vaultBalanceOf(bool _callReply, address account) external returns (bytes32 messageId) {}
@@ -49,7 +49,7 @@ contract VaultAppAbi is IVaultApp {
     function adminUnpause(bool _callReply) external returns (bytes32 messageId) {}
 }
 
-interface IVaultAppCallbacks {
+interface IVaultCallbacks {
     function replyOn_create(bytes32 messageId) external;
 
     function replyOn_vaultBalanceOf(bytes32 messageId, uint128 reply) external;
@@ -71,12 +71,12 @@ interface IVaultAppCallbacks {
     function onErrorReply(bytes32 messageId, bytes calldata payload, bytes4 replyCode) external payable;
 }
 
-contract VaultAppCaller is IVaultAppCallbacks {
-    IVaultApp public immutable VARA_ETH_PROGRAM;
+contract VaultCaller is IVaultCallbacks {
+    IVault public immutable VARA_ETH_PROGRAM;
 
     error UnauthorizedCaller();
 
-    constructor(IVaultApp _varaEthProgram) {
+    constructor(IVault _varaEthProgram) {
         VARA_ETH_PROGRAM = _varaEthProgram;
     }
 

@@ -341,7 +341,7 @@ Concrete snippet files:
 
 Operational notes from the live `vault` run:
 
-- deploy the generated ABI interface contract first, for example with `forge create --broadcast ... VaultApp.sol:VaultAppAbi`
+- deploy the generated ABI interface contract first, for example with `forge create --broadcast ... Vault.sol:VaultAbi`
 - `createProgramWithAbiInterface(...)` creates a new mirror/program tied to that ABI interface
 - the ABI-enabled mirror still needs executable balance top-up before the first message
 - initialization can be sent through the ABI method `create(false)`

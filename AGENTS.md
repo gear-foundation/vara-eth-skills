@@ -23,6 +23,9 @@ Use the narrowest skill for the task:
 
 - `skills/vara-eth-contract-writer/SKILL.md` for Rust/Sails Vara.eth contracts, `ethexe` restrictions, payable methods, public types, services, events, and build/test expectations.
 - `skills/vara-eth-app-builder/SKILL.md` for deploy, create, top-up, init, CLI, TypeScript, ABI interface, reply handling, state reads, and end-to-end workflows around an existing contract.
+- `skills/vara-eth-full-app-builder/SKILL.md` for complete user-facing Vara.eth apps that combine contracts or artifacts, deploy/attach flows, TypeScript interaction modules, wallet/frontend UX, environment configuration, scripts, and full-flow validation.
+- `skills/vara-eth-injected-app-builder/SKILL.md` for apps where browser wallet signing creates injected Vara.eth writes, setup uses executable balance and injected setup messages, and the frontend reads state through Vara.eth RPC.
+- `skills/vara-eth-mirror-adapter-frontend-builder/SKILL.md` for browser frontends that call a Solidity adapter through normal Ethereum wallet transactions while the adapter calls an ABI-enabled Vara.eth Mirror asynchronously and callbacks finalize adapter state.
 - `skills/vara-eth-solidity-integrator/SKILL.md` for Solidity contracts that call Vara.eth through generated ABI interfaces and handle async callbacks.
 
 Use `playbooks/` for detailed task flows and `references/` for reusable source maps and checklists.
@@ -33,6 +36,7 @@ Examples are verification references, not mandatory templates:
 
 - `examples/vault` demonstrates a Rust/Sails Vara.eth contract plus CLI, TypeScript, and ABI interaction flows.
 - `examples/escrow` demonstrates a Solidity adapter that holds ETH while a Vara.eth program confirms asynchronous state transitions.
+- `examples/digit-recognition-injected-frontend` demonstrates a browser app where writes enter through injected Vara.eth transactions and state is confirmed through Vara.eth reads.
 
 When adding examples:
 
@@ -69,4 +73,5 @@ Prefer task-specific validation:
 - Solidity adapter examples: `forge build` or another Solidity compiler check when available
 - ABI interface examples: regenerate with `cargo sails sol --idl-path ...` after IDL changes
 - deploy/interact flows: verify against the current `ethexe` binary and live output when a network is involved
+- full app flows: run contract checks, package checks, and UI or smoke-flow verification when practical
 - documentation changes: verify claims against the implementation source above
