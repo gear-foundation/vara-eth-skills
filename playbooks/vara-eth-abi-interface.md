@@ -80,7 +80,7 @@ forge create \
   --contracts . \
   --rpc-url "$ETH_RPC" \
   --private-key "$PRIVATE_KEY" \
-  VaultApp.sol:VaultAppAbi
+  Vault.sol:VaultAbi
 ```
 
 The deployed ABI contract address is then used when creating the Vara.eth mirror with ABI enabled. The upload and code-validation part is still the same as the plain `ethexe tx create` flow: upload the `.opt.wasm`, wait for validation approval, capture the `code_id`, and only then call `create-with-abi`.

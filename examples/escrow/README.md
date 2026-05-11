@@ -50,3 +50,54 @@ cargo sails sol --idl-path target/wasm32-gear/release/order_escrow.idl
 ```
 
 Check the generated function and callback names before using `contracts/OrderEscrowAdapter.sol` unchanged. The adapter intentionally names the expected generated ABI surface, but generated names are the source of truth.
+
+Generated `.sol` files include callback stubs with `TODO` comments. The actual Solidity integration example is `contracts/OrderEscrowAdapter.sol`.
+For methods that return unit, the live reply payload may use a `bytes32,()`
+callback selector even when the generated stub shows only `bytes32`. The adapter
+keeps the generated methods and also accepts the observed unit-return selectors
+through a restricted fallback.
+
+## Frontend
+
+The `frontend/` package is a Vite app for the deployed `OrderEscrowAdapter`.
+It uses MetaMask or another EIP-1193 wallet for Ethereum transactions and polls
+the adapter state after transaction receipts so the UI can show the later
+Vara.eth callback result. It also performs a separate Vara.eth read-only query
+for `Orders.StatusOf(varaEthOrderId)` through `calculateReplyForHandle(...)`.
+This lets the UI show both confirmation layers:
+
+- Adapter state: `createdOnVaraEth = true`
+- Vara.eth state: `status = Created`
+
+Required config:
+
+```bash
+cp frontend/.env.example frontend/.env
+```
+
+Set:
+
+- `VITE_ETHEREUM_RPC`: Ethereum RPC endpoint for reads and receipts.
+- `VITE_VARA_ETH_RPC`: Vara.eth WebSocket RPC endpoint for read-only Sails queries.
+- `VITE_ROUTER_ADDRESS`: deployed Vara.eth Router address.
+- `VITE_ESCROW_ADAPTER_ADDRESS`: deployed `OrderEscrowAdapter` address.
+
+Run:
+
+```bash
+cd frontend
+npm install
+npm run check
+npm run build
+npm run dev
+```
+
+The app expects the Vara.eth program, generated ABI interface, ABI-enabled
+Mirror, and `OrderEscrowAdapter` to be deployed and initialized first. Browser
+actions call the Solidity adapter only; the adapter calls the ABI-enabled
+Vara.eth Mirror and receives async callbacks. Read-only UI confirmation uses
+Vara.eth RPC directly, so an Ethereum receipt or adapter callback is not treated
+as the only proof of Vara.eth program state. On connect or refresh, the frontend
+rebuilds the visible order list from `nextLocalOrderId()` and `orders(id)`, so a
+page reload does not lose contract-backed order state. The activity log is only
+the current browser session log.

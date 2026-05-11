@@ -53,11 +53,15 @@ contract OrderEscrowAdapter is IOrderEscrowAppCallbacks {
     }
 
     IOrderEscrowApp public immutable VARA_ETH_PROGRAM;
+    bytes4 private constant UNIT_RELEASE_CALLBACK_SELECTOR = bytes4(keccak256("replyOn_ordersReleaseOrder(bytes32,())"));
+    bytes4 private constant UNIT_REFUND_CALLBACK_SELECTOR = bytes4(keccak256("replyOn_ordersRefundOrder(bytes32,())"));
+    bytes4 private constant UNIT_CANCEL_CALLBACK_SELECTOR = bytes4(keccak256("replyOn_ordersCancelOrder(bytes32,())"));
 
     uint128 public nextLocalOrderId = 1;
 
     mapping(uint128 => LocalOrder) public orders;
     mapping(bytes32 => PendingOperation) public pendingOperations;
+    mapping(uint128 => bool) public pendingOrderAction;
     mapping(address => uint128) public claimable;
 
     error UnauthorizedCaller();
@@ -67,9 +71,11 @@ contract OrderEscrowAdapter is IOrderEscrowAppCallbacks {
     error OrderDoesNotExist();
     error OrderIsClosed();
     error OrderIsNotCreatedOnVaraEth();
+    error OrderHasPendingOperation();
     error OnlyBuyer();
     error OnlySeller();
     error TransferFailed();
+    error UnsupportedCallback(bytes4 selector);
     error UnknownMessage(bytes32 messageId);
 
     event OrderCreateRequested(bytes32 indexed messageId, uint128 indexed localOrderId, address indexed buyer, address seller, uint128 amount);
@@ -138,6 +144,7 @@ contract OrderEscrowAdapter is IOrderEscrowAppCallbacks {
         }
 
         bytes32 messageId = VARA_ETH_PROGRAM.ordersReleaseOrder(true, order.varaEthOrderId);
+        pendingOrderAction[localOrderId] = true;
         pendingOperations[messageId] = PendingOperation(OperationKind.Release, localOrderId);
 
         emit OrderReleaseRequested(messageId, localOrderId);
@@ -155,6 +162,7 @@ contract OrderEscrowAdapter is IOrderEscrowAppCallbacks {
         }
 
         bytes32 messageId = VARA_ETH_PROGRAM.ordersRefundOrder(true, order.varaEthOrderId);
+        pendingOrderAction[localOrderId] = true;
         pendingOperations[messageId] = PendingOperation(OperationKind.Refund, localOrderId);
 
         emit OrderRefundRequested(messageId, localOrderId);
@@ -172,6 +180,7 @@ contract OrderEscrowAdapter is IOrderEscrowAppCallbacks {
         }
 
         bytes32 messageId = VARA_ETH_PROGRAM.ordersCancelOrder(true, order.varaEthOrderId);
+        pendingOrderAction[localOrderId] = true;
         pendingOperations[messageId] = PendingOperation(OperationKind.Cancel, localOrderId);
 
         emit OrderCancelRequested(messageId, localOrderId);
@@ -188,30 +197,77 @@ contract OrderEscrowAdapter is IOrderEscrowAppCallbacks {
     }
 
     function replyOn_ordersReleaseOrder(bytes32 messageId) external onlyVaraEthProgram {
+        _completeRelease(messageId);
+    }
+
+    function replyOn_ordersRefundOrder(bytes32 messageId) external onlyVaraEthProgram {
+        _completeRefund(messageId);
+    }
+
+    function replyOn_ordersCancelOrder(bytes32 messageId) external onlyVaraEthProgram {
+        _completeCancel(messageId);
+    }
+
+    receive() external payable {
+        revert UnsupportedCallback(bytes4(0));
+    }
+
+    fallback() external payable onlyVaraEthProgram {
+        bytes4 selector = msg.sig;
+
+        if (msg.data.length == 36) {
+            bytes32 messageId;
+            assembly ("memory-safe") {
+                messageId := calldataload(4)
+            }
+
+            if (selector == UNIT_RELEASE_CALLBACK_SELECTOR) {
+                _completeRelease(messageId);
+                return;
+            }
+
+            if (selector == UNIT_REFUND_CALLBACK_SELECTOR) {
+                _completeRefund(messageId);
+                return;
+            }
+
+            if (selector == UNIT_CANCEL_CALLBACK_SELECTOR) {
+                _completeCancel(messageId);
+                return;
+            }
+        }
+
+        revert UnsupportedCallback(selector);
+    }
+
+    function _completeRelease(bytes32 messageId) internal {
         PendingOperation memory operation = _takePending(messageId, OperationKind.Release);
         LocalOrder storage order = orders[operation.localOrderId];
 
         order.closed = true;
+        pendingOrderAction[operation.localOrderId] = false;
         claimable[order.seller] += order.amount;
 
         emit OrderReleased(messageId, operation.localOrderId, order.seller, order.amount);
     }
 
-    function replyOn_ordersRefundOrder(bytes32 messageId) external onlyVaraEthProgram {
+    function _completeRefund(bytes32 messageId) internal {
         PendingOperation memory operation = _takePending(messageId, OperationKind.Refund);
         LocalOrder storage order = orders[operation.localOrderId];
 
         order.closed = true;
+        pendingOrderAction[operation.localOrderId] = false;
         claimable[order.buyer] += order.amount;
 
         emit OrderRefunded(messageId, operation.localOrderId, order.buyer, order.amount);
     }
 
-    function replyOn_ordersCancelOrder(bytes32 messageId) external onlyVaraEthProgram {
+    function _completeCancel(bytes32 messageId) internal {
         PendingOperation memory operation = _takePending(messageId, OperationKind.Cancel);
         LocalOrder storage order = orders[operation.localOrderId];
 
         order.closed = true;
+        pendingOrderAction[operation.localOrderId] = false;
         claimable[order.buyer] += order.amount;
 
         emit OrderCancelled(messageId, operation.localOrderId, order.buyer, order.amount);
@@ -232,6 +288,7 @@ contract OrderEscrowAdapter is IOrderEscrowAppCallbacks {
             order.closed = true;
             claimable[order.buyer] += order.amount;
         } else {
+            pendingOrderAction[operation.localOrderId] = false;
             order.failed = true;
         }
 
@@ -260,6 +317,10 @@ contract OrderEscrowAdapter is IOrderEscrowAppCallbacks {
 
         if (order.closed) {
             revert OrderIsClosed();
+        }
+
+        if (pendingOrderAction[localOrderId]) {
+            revert OrderHasPendingOperation();
         }
     }
 

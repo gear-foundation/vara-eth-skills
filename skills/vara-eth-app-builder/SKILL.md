@@ -5,7 +5,7 @@ description: Build and verify Vara.eth deploy, interaction, and integration exam
 
 # Vara.eth App Builder
 
-Use this skill after a Vara.eth contract already exists. Contract authoring belongs to `vara-eth-contract-writer`; this skill starts from built artifacts, IDL, code id, program id, Router/Mirror addresses, or integration requirements.
+Use this skill after a Vara.eth contract already exists. Contract authoring belongs to `vara-eth-contract-writer`; complete user-facing applications belong to `vara-eth-full-app-builder`. This skill starts from built artifacts, IDL, code id, program id, Router/Mirror addresses, or integration requirements.
 
 ## Choose The Flow
 
@@ -14,6 +14,9 @@ Pick the narrowest workflow for the task:
 - Direct CLI lifecycle: read `../../playbooks/vara-eth-ethexe-cli-workflow.md`.
 - Scripted TypeScript lifecycle: read `../../playbooks/vara-eth-ts-api-workflow.md`.
 - Solidity ABI interface lifecycle: read `../../playbooks/vara-eth-abi-interface.md`.
+- Injected browser/frontend lifecycle: use `../vara-eth-injected-app-builder/SKILL.md`.
+- Solidity adapter frontend lifecycle: use `../vara-eth-mirror-adapter-frontend-builder/SKILL.md`.
+- Complete user-facing app lifecycle: use `../vara-eth-full-app-builder/SKILL.md`.
 - Solidity contract adapter or callback handler: use `../vara-eth-solidity-integrator/SKILL.md`.
 
 Use `../../references/source-map.md` when a claim depends on implementation details. Use `../../references/flow-checks.md` as the final review checklist for deploy/interact examples.
@@ -96,6 +99,8 @@ An ABI-enabled workflow has these pieces:
 Ethereum transaction receipts can arrive before Vara.eth state is visible through read-only calls. Examples should make this explicit and verify state with polling or repeated reads where needed.
 
 For Solidity contracts that call an ABI-enabled Vara.eth program, treat the Ethereum call as asynchronous. Store the returned `messageId`, complete local Solidity state only from trusted callbacks, and keep ETH value, Vara.eth native value, and wVARA executable balance separate.
+
+When verifying ABI callbacks, include at least one method that returns a value and one method that returns unit/empty output. If Vara.eth state changes but the Solidity adapter remains pending, inspect Mirror `ReplyCallFailed` events and decode the reply payload selector. A success reply can still fail at the Solidity callback layer because the adapter implements `replyOn_...(bytes32)` while the actual unit-return payload selects `replyOn_...(bytes32,())`.
 
 ## Replies And State Reads
 

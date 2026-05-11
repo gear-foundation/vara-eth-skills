@@ -71,6 +71,8 @@ The usual shape is:
 
 Check the generated Solidity file before writing the adapter, especially method names, callback names, payable markers, and integer/address mappings.
 
+For methods that return unit/empty values, do not trust the stub shape alone. Verify the actual success reply payload selector from a live or smoke flow. A unit-return method may arrive as `replyOn_<service><Method>(bytes32,())` even when a generated stub shows `replyOn_<service><Method>(bytes32)`. If the Mirror emits `ReplyCallFailed` with a success reply code, compare the payload selector with the adapter's implemented selector and add a restricted fallback or exact callback handler for the observed unit selector.
+
 ## Integration Shapes
 
 Useful patterns include:
@@ -91,6 +93,7 @@ Before treating a Solidity integration as ready:
 - Every async call stores a unique `messageId` context.
 - Callback sender is restricted to the trusted ABI/Mirror contract.
 - Unknown or repeated callbacks cannot complete an operation.
+- Unit-return callbacks were tested against the actual reply payload selector; `ReplyCallFailed` on a success reply was investigated as a possible selector mismatch.
 - Local user accounting does not assume Vara.eth sees the original EVM user.
 - ETH value, wVARA executable balance, and Vara.eth native value are described separately.
 - Error callbacks have an explicit retry, fail, or refund policy.
